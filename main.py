@@ -1,14 +1,63 @@
-import requests
+#!/usr/bin/python
+import argparse
+import configparser
 import mwclient
 import mwparserfromhell
 
 
+global userName, password
+
+argParser = argparse.ArgumentParser(description="Resolve a wiki's links \
+to redirect pages")
+argParser.add_argument("-c", "--config", default="mwlinkresolve.conf",
+                       help="Specifies config file path containing default \
+options. Defaults to \"mwlinkresolve.conf\".")
+argParser.add_argument("-s", "--site",
+                       help="API URL of wiki. If it doesn't end in \
+\"api.php\", it will be interpreted as a fandom.com wiki name.")
+argParser.add_argument("-u", "--user",
+                       help="Botpassword name.")
+argParser.add_argument("-p", "--password",
+                       help="Botpassword token.")
+argParser.add_argument("--dry", action="store_true",
+                       help="Skip all edits.")
+args = argParser.parse_args()
+
+try:
+    config = configparser.ConfigParser()
+    config.read(args.config)
+    config = config["Config"]
+    if config.get("Site") is not None:
+        url = config["Site"]
+    if config.get("User") is not None:
+        userName = config["User"]
+    if config.get("Password") is not None:
+        password = config["Password"]
+except:
+    if not (args.site and args.user and args.password):
+        print("Unable to read config file, and not all necessary \
+options are provided.")
+        exit()
+if args.site is not None:
+    url = args.site
+if args.user is not None:
+    userName = args.user
+if args.password is not None:
+    password = args.password
+dry = args.dry
+print("This will be a dry run.")
+
+if url[-7:] != "api.php":
+    url += ".fandom.com/"
+else:
+    url = url[:-7]
+
 pageCache = {}
 redirectCache = {}
 jobCache = {}
-site = mwclient.Site("oxygennotincluded.gamepedia.com", path="/")
-userName = "dummy"
-password = "thicc"
+
+index = url.find("/")
+site = mwclient.Site(url[:index], path=url[index:])
 site.login(userName, password)
 
 
@@ -55,9 +104,7 @@ def listPageTitles(response):
 
 
 def request(cont=None):
-    url = "https://oxygennotincluded.gamepedia.com/api.php"
     params = {
-        "action": "query",
         "generator": "allredirects",
         "garlimit": "300",
         "format": "json",
@@ -67,7 +114,7 @@ def request(cont=None):
         for p in cont:
             params[p] = cont[p]
     print("Query params:", params)
-    return requests.get(url, params).json()
+    return site.get('query', **params)
 
 
 def upperfirst(x):
@@ -79,6 +126,7 @@ while True:
     response = request(cont)
     all_redirects = listPageTitles(response)
     print("Queried batch of redirect pages:", all_redirects)
+    print("Processing batch. This might take a bit.")
     for page in all_redirects:
         processBacklinks(page)
     if response.get("continue") is None:
@@ -88,6 +136,7 @@ while True:
 print("Job list:", jobCache)
 
 for job in jobCache:
+    changed = False
     page = getPage(job)
     pageText = mwparserfromhell.parse(page.text())
     for link in pageText.filter_wikilinks():
@@ -103,9 +152,14 @@ for job in jobCache:
                   "Should be pointing to", redirect)
             pageText.replace(link,
                              mwparserfromhell.nodes.Wikilink(redirect, text))
-    try:
-        page.edit(str(pageText),
-                  summary="Resolve links to redirect",
-                  minor=True)
-    except:
-        print("Unsuccesful edit")
+            changed = True
+    if changed:
+        if not dry:
+            try:
+                page.edit(str(pageText),
+                          summary="Resolve links to redirect",
+                          minor=True)
+            except:
+                print("Unsuccesful edit")
+        else:
+            print("Skipping edit. (Dry run.)")
