@@ -8,7 +8,9 @@ Note, that Wikipedia guidelines discourage the "correction" of links pointing to
 
 ## Installation
 
-Install python3. Install `mwclient` and `mwparserfromhell` with pip.
+A Windows executable release is available [here](https://github.com/KovacsGG/mwlinkresolve/releases)
+
+It is recommended to use the source scripts, if your system makes available a python environment. Install `mwclient` and `mwparserfromhell` with pip.
 
 ## Usage
 
