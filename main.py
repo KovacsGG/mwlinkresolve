@@ -45,7 +45,8 @@ if args.user is not None:
 if args.password is not None:
     password = args.password
 dry = args.dry
-print("This will be a dry run.")
+if dry:
+    print("This will be a dry run.")
 
 if url[-7:] != "api.php":
     url += ".fandom.com/"
