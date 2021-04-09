@@ -10,15 +10,17 @@ Note, that Wikipedia guidelines discourage the "correction" of links pointing to
 
 A Windows executable release is available [here](https://github.com/KovacsGG/mwlinkresolve/releases)
 
-It is recommended to use the source scripts, if your system makes available a python environment. Install `mwclient` and `mwparserfromhell` with pip.
+It is recommended to use the source scripts, if your system provides a python interpreter. Install `mwclient` and `mwparserfromhell` with pip.
 
 ## Usage
 
 `python3 mwlinkresolve.py [OPTIONS]`
 
+`./mwlinkresolve.exe [OPTIONS]`
+
 #### `--site`, `-s`
 
-To select the target wiki and provide the API URL.
+To select the target wiki and provide the API URL. Either a fully qualified domain name along with the path of the API, or simply the subdomain of a fandom.com wiki. In the former case, it should end with `api.php`, such as `en.wikipedia.org/w/api.php`
 
 #### `--user`, `-u`
 
@@ -46,7 +48,7 @@ A sample configuration file might look like this:
 [Config]
 Site = oxygennotincluded
 User = User@BotName
-Password = BotToken
+Password = ge91BotToken2sw45pws5
 ```
 
 In this example, `oxygennotincluded` will be taken to mean `oxygennotincluded.fandom.com/api.php`. Strings ending with `api.php` are taken literally.

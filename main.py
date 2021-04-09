@@ -7,19 +7,19 @@ import mwparserfromhell
 
 global userName, password
 
-argParser = argparse.ArgumentParser(description="Resolve a wiki's links \
-to redirect pages")
-argParser.add_argument("-c", "--config", default="mwlinkresolve.conf",
-                       help="Specifies config file path containing default \
-options. Defaults to \"mwlinkresolve.conf\".")
+argParser = argparse.ArgumentParser(description="Resolve a wiki's links to redirect pages",
+                                    epilog="See also https://github.com/KovacsGG/mwlinkresolve#usage")
+argParser.add_argument("-c", "--config",
+                       default="mwlinkresolve.conf",
+                       help="Specifies config file path containing default options. Defaults to \"mwlinkresolve.conf\".")
 argParser.add_argument("-s", "--site",
-                       help="API URL of wiki. If it doesn't end in \
-\"api.php\", it will be interpreted as a fandom.com wiki name.")
+                       help="API URL of wiki. If it doesn't end in \"api.php\", it will be interpreted as a fandom.com wiki name.")
 argParser.add_argument("-u", "--user",
-                       help="Botpassword name.")
+                       help="Login name, such as \"UserName@python\".")
 argParser.add_argument("-p", "--password",
                        help="Botpassword token.")
-argParser.add_argument("--dry", action="store_true",
+argParser.add_argument("--dry",
+                       action="store_true",
                        help="Skip all edits.")
 args = argParser.parse_args()
 
@@ -35,8 +35,7 @@ try:
         password = config["Password"]
 except:
     if not (args.site and args.user and args.password):
-        print("Unable to read config file, and not all necessary \
-options are provided.")
+        print("Unable to read config file, and not all necessary options are provided.")
         exit()
 if args.site is not None:
     url = args.site
